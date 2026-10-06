@@ -1,5 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(unitree_lidar_ros2)
+
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -39,19 +43,15 @@ add_definitions(${PCL_DEFINITIONS})
 
 add_executable(unitree_lidar_ros2_node src/unitree_lidar_ros2_node.cpp)
 
-target_link_libraries( unitree_lidar_ros2_node
-  ${Boost_SYSTEM_LIBRARY}
+target_link_libraries(unitree_lidar_ros2_node
   ${PCL_LIBRARIES}
   libunilidar_sdk2.a
-)
-
-ament_target_dependencies(
-  unitree_lidar_ros2_node
-  rclcpp std_msgs 
-  sensor_msgs
-  geometry_msgs 
-  tf2_ros
-  pcl_conversions
+  rclcpp::rclcpp
+  ${std_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  tf2_ros::tf2_ros
+  pcl_conversions::pcl_conversions
 )
 
 install(TARGETS

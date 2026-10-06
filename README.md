@@ -1,3 +1,6 @@
+For ABYSS Instructions:
+Follow the steps in [ABYSS_README.md](/docs/ABYSS_README.md)
+
 # Unilidar SDK2
 
 [中文版 | Chinese](./README_CN.md)
