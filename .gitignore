@@ -1,0 +1,21 @@
+# colcon build output (any workspace)
+build/
+install/
+log/
+
+# Point-LIO runtime output
+*.pcd
+Log/*.txt
+Log/*.csv
+
+# Point-LIO README images (246 MB, available upstream)
+point_lio_ros2_ws/src/point_lio/image/
+
+# Unitree's ROS1 Point-LIO, reference only (can't build on ROS2), available upstream
+point_lio_unilidar/
+
+# Editor and system files
+.vscode/
+__pycache__/
+*.pyc
+testdisk.log
