@@ -1,3 +1,5 @@
+> **Moved.** The LiDAR driver and Point-LIO, with ABYSS's fixes, now live in [ABYSSros](https://github.com/ABYSSrover/ABYSSros) (`src/unitree_lidar_ros2` and `src/point_lio`). Start them there with `ros2 launch abyss_bringup laptop.launch.py`, which also saves and views maps. This repo is kept for reference only. Note that this repo never stored the `point_lio` source itself, only a pointer to it.
+
 For ABYSS Instructions:
 Follow the steps in [ABYSS_README.md](/docs/ABYSS_README.md)
 
