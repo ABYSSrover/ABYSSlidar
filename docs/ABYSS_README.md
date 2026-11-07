@@ -123,3 +123,103 @@ sudo apt-get install -y ros-lyrical-pcl-ros
 sudo apt-get install ros-lyrical-pcl-conversions
 sudo apt-get install libeigen3-dev
 ```
+
+## 5. Saving and viewing the point cloud
+
+Every new terminal needs ROS loaded first. Run the commands below from the `ABYSSlidar` folder.
+
+```bash
+source /opt/ros/lyrical/setup.bash
+```
+
+Start the LiDAR and Point-LIO in their own terminal. Stop them with Ctrl+C when you're done.
+
+```bash
+./run.sh
+```
+
+There are two ways to save the point cloud:
+
+| | Bag recording (5.1) | Saved map (5.2) |
+|---|---|---|
+| **Detail** | Full resolution, same as the live view | Downsampled, so it looks thinner |
+| **Contents** | Only the time you recorded | The whole Point-LIO session |
+| **How to save** | Run a command | Automatic when Point-LIO stops |
+
+### 5.1 Recording and replaying a clip
+
+Use this when you want the replay to look like the live view.
+
+**Record:** wait until points are moving in RViz, then run the command below. `30` is the length in seconds. Expect about 3 MB per second.
+
+```bash
+mkdir -p ~/lidar_clips
+timeout -s INT 30 ros2 bag record -s mcap -o ~/lidar_clips/my_clip --topics /cloud_registered /path /tf /tf_static
+```
+
+The folder named after `-o` must not already exist, so use a new name for each clip.
+
+**Check it:** the duration should be close to the length you asked for. If it's much shorter, Point-LIO wasn't publishing for part of the recording.
+
+```bash
+ros2 bag info ~/lidar_clips/my_clip
+```
+
+**Replay:** stop `./run.sh` with Ctrl+C first, or its live points will mix with the replay. Then open RViz:
+
+```bash
+rviz2 -d rviz/replay_view.rviz
+```
+
+In a second terminal, play the clip:
+
+```bash
+source /opt/ros/lyrical/setup.bash
+ros2 bag play ~/lidar_clips/my_clip
+```
+
+The points build up as the clip plays and stay on screen afterwards, so you can orbit around them.
+
+### 5.2 Viewing the saved map
+
+Point-LIO saves its map when it stops, as long as you stop it with Ctrl+C. `./run.sh --restart` force-kills it, so a session stopped that way isn't saved. The map is saved here:
+
+```
+point_lio_ros2_ws/src/point_lio/PCD/scans.pcd
+```
+
+Each run replaces this file, so copy any map you want to keep:
+
+```bash
+cp point_lio_ros2_ws/src/point_lio/PCD/scans.pcd ~/lidar_clips/map_$(date +%F_%H%M).pcd
+```
+
+To view it with the live view's colours and layout, make sure `./run.sh` is stopped, then open RViz:
+
+```bash
+rviz2 -d rviz/map_view.rviz
+```
+
+In a second terminal, publish the map. Keep this running while you view it:
+
+```bash
+source /opt/ros/lyrical/setup.bash
+ros2 run pcl_ros pcd_to_pointcloud --ros-args \
+  -p file_name:=$PWD/point_lio_ros2_ws/src/point_lio/PCD/scans.pcd \
+  -p tf_frame:=camera_init -r cloud_pcd:=/cloud_registered
+```
+
+For a quick look without RViz, install `pcl-tools` and open the file directly. Press `+` to make the points bigger and `4` to colour by height.
+
+```bash
+sudo apt install pcl-tools
+pcl_viewer point_lio_ros2_ws/src/point_lio/PCD/scans.pcd
+```
+
+### 5.3 Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `timeout: failed to execute process` or `ros2: command not found` | ROS isn't loaded in this terminal. Run `source /opt/ros/lyrical/setup.bash`. |
+| `ros2 bag record` says `unrecognized arguments` | List the topics after `--topics`. |
+| The bag has 0 messages | Nothing was publishing. Check that `./run.sh` is running and that points are moving in RViz. |
